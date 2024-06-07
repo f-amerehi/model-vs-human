@@ -219,7 +219,7 @@ class ErrorConsistency(Analysis):
             for m in models:
                 yvalue = get_result(result_df, df, m, condition=c)
                 attr = dm.decision_maker_to_attributes(m, decision_makers)
-                result_df = result_df.append({'subj': attr["plotting_name"],
+                result_df = result_df._append({'subj': attr["plotting_name"],
                                               'condition': c,
                                               'yvalue': yvalue,
                                               'decision-maker-ID': attr["ID"]},
@@ -230,7 +230,7 @@ class ErrorConsistency(Analysis):
                 hvalues.append(get_result(result_df, df, h, condition=c))
 
             attr = dm.decision_maker_to_attributes(h, decision_makers)
-            result_df = result_df.append({'subj': attr["plotting_name"],
+            result_df = result_df._append({'subj': attr["plotting_name"],
                                           'condition': c,
                                               'yvalue': np.mean(hvalues),
                                               'decision-maker-ID': attr["ID"]},
@@ -253,7 +253,7 @@ class XYAnalysis(Analysis):
                 subdat = df.loc[(df["condition"]==c) & (df["subj"].isin(d.decision_makers))]
                 r = self.analysis(subdat)
                 assert len(r) == 1, "Analysis unexpectedly returned more than one scalar."
-                result_df = result_df.append({'subj': d.plotting_name,
+                result_df = result_df._append({'subj': d.plotting_name,
                                               'condition': c,
                                               'yvalue': list(r.values())[0],
                                               'decision-maker-ID': d.ID},

@@ -1,4 +1,8 @@
 import warnings
+
+import torch
+from aux_bn import MixBatchNorm2d
+
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 from modelvshuman import Plot, Evaluate
@@ -6,10 +10,39 @@ from modelvshuman import constants as c
 from plotting_definition import plotting_definition_template
 
 
+def load_multi(checkpoint_path):
+    state_dict = torch.load(checkpoint_path)
+    state_dict = {k[7:]: v for k, v in state_dict['state_dict'].items()}
+    return state_dict
+
 def run_evaluation():
-    models = ["resnet50", "bagnet33", "simclr_resnet50x1"]
+    models = [
+        "resnet50m",
+        "resnet50d",
+        "resnet50s",
+        "resnet50t"
+    ]
+    state_dicts = [
+        lambda: torch.load('/mnt/c/Projects/imagenetx/merged_model_checkpoint.pth.tar')['state_dict'],
+        lambda: load_multi('/mnt/c/Projects/imagenetx/res50-debiased.pth.tar'),
+        lambda: load_multi('/mnt/c/Projects/imagenetx/res50-shape-biased.pth.tar'),
+        lambda: load_multi('/mnt/c/Projects/imagenetx/res50-texture-biased.pth.tar'),
+    ]
+    assert len(models)==len(state_dicts)
     datasets = c.DEFAULT_DATASETS # or e.g. ["cue-conflict", "uniform-noise"]
-    params = {"batch_size": 64, "print_predictions": True, "num_workers": 20}
+    params = {
+        "batch_size": 64,
+        "print_predictions": True,
+        "num_workers": 2,
+
+        "model_args": {
+            "norm_layer": MixBatchNorm2d
+        },
+
+
+        #####################################
+        "state_dicts": state_dicts
+    }
     Evaluate()(models, datasets, **params)
 
 

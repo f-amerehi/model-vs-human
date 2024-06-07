@@ -10,12 +10,33 @@ _PYTORCH_IMAGE_MODELS = "rwightman/pytorch-image-models"
 _EFFICIENTNET_MODELS = "rwightman/gen-efficientnet-pytorch"
 
 
-def model_pytorch(model_name, *args):
+def model_pytorch(model_name, *args, **kwargs):
     import torchvision.models as zoomodels
-    model = zoomodels.__dict__[model_name](pretrained=True)
+    state_dict = kwargs['state_dict']
+    kwargs.pop('state_dict')
+
+    model = zoomodels.__dict__[model_name]( **kwargs)
+    model.load_state_dict(state_dict)
     model = torch.nn.DataParallel(model)
     return PytorchModel(model, model_name, *args)
 
+
+
+@register_model("pytorch")
+def resnet50m(model_name, *args, **kwargs):
+    return model_pytorch('resnet50', *args, **kwargs)
+
+@register_model("pytorch")
+def resnet50d(model_name, *args, **kwargs):
+    return model_pytorch('resnet50', *args, **kwargs)
+
+@register_model("pytorch")
+def resnet50s(model_name, *args, **kwargs):
+    return model_pytorch('resnet50', *args, **kwargs)
+
+@register_model("pytorch")
+def resnet50t(model_name, *args, **kwargs):
+    return model_pytorch('resnet50', *args, **kwargs)
 
 @register_model("pytorch")
 def resnet50_trained_on_SIN(model_name, *args):

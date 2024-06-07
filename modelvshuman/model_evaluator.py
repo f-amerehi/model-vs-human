@@ -143,11 +143,22 @@ class ModelEvaluator:
         Returns:
 
         """
+
+        state_dicts = kwargs['state_dicts']
+        model_args = kwargs['model_args']
+        kwargs.pop("state_dicts")
+        kwargs.pop("model_args")
+
         logging.info("Model evaluation.")
         _datasets = self._get_datasets(dataset_names, *args, **kwargs)
-        for model_name in models:
+        for index, model_name in enumerate(models):
             datasets = _datasets
-            model, framework = load_model(model_name, *args)
+            state_dict = state_dicts[index]()
+            model_args['state_dict'] = state_dict
+            model, framework = load_model(model_name, *args, **model_args)
+
+
+
             evaluator = self._get_evaluator(framework)
             if framework == 'tensorflow':
                 datasets = self._to_tensorflow(datasets)
